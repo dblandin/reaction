@@ -52,8 +52,10 @@ export class ArtworkSidebarCommercialContainer extends React.Component<
       this.props.artwork.edition_sets[0].__id,
   }
 
-  renderEdition(edition) {
-    const isEcommerceEnrolled = edition.is_acquireable || edition.is_inquireable
+  renderEdition(artwork, edition) {
+    const isEcommerceEnrolled =
+      (artwork.is_acquireable || artwork.is_offerable) &&
+      (edition.is_acquireable || edition.is_offerable)
     const editionFragment = (
       <>
         <SizeInfo piece={edition} />
@@ -62,27 +64,30 @@ export class ArtworkSidebarCommercialContainer extends React.Component<
         </Serif>
       </>
     )
-
-    return (
-      <Row>
-        <Radio
-          mr="1"
-          onSelect={e => {
-            this.setState({ selectedEditionId: edition.__id } as any)
-          }}
-          selected={this.state.selectedEditionId === edition.__id}
-          disabled={!isEcommerceEnrolled}
-        />
-        {editionFragment}
-      </Row>
-    )
+    if (isEcommerceEnrolled) {
+      return (
+        <Row>
+          <Radio
+            mr="1"
+            onSelect={e => {
+              this.setState({ selectedEditionId: edition.__id } as any)
+            }}
+            selected={this.state.selectedEditionId === edition.__id}
+            disabled={!isEcommerceEnrolled}
+          />
+          {editionFragment}
+        </Row>
+      )
+    } else {
+      return <Row>{editionFragment}</Row>
+    }
   }
   renderEditions() {
     const editions = this.props.artwork.edition_sets
     const editionsFragment = editions.map((edition, index) => {
       return (
         <React.Fragment key={edition.__id}>
-          <Box p={2}>{this.renderEdition(edition)}</Box>
+          <Box p={2}>{this.renderEdition(this.props.artwork, edition)}</Box>
           {index !== editions.length - 1 && <Separator />}
         </React.Fragment>
       )
